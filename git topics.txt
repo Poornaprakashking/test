@@ -1,0 +1,213 @@
+1.How to install package with Playbook:
+---
+- name: This is test playbook
+  hosts: all
+  become: true
+  tasks:
+  - name: installin git package
+    yum:
+      name: git
+      state: installed
+--------------------------------------------------------------------
+1.1 How to Install Multiple Packages at a time in all nodes
+---
+- name: My test playbook
+  hosts: all
+  become: true
+  tasks:
+  - name: install packages
+    yum:
+      name: [ 'git', 'make', 'gcc', 'wget', 'mysql', 'tree', 'which', 'docker']
+      state: installed
+----------------------------------------------------------------
+1.2 How to install mutiple packages by using Loops Concept:
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: install git and tree packages
+      yum:
+        name: '{{ item }}'
+        state: present
+      loop:
+        - tree
+        - git
+        - java
+        - docker
+----------------------------------------------------------------------
+2.How to create user in playbook
+---
+- name: This playbook is used to create a user
+  hosts: all
+  become: true
+  tasks:
+  - name: creating a user rohit
+    user: name=suresh
+or
+----------------------------------------------------------------
+---
+- name: This playbook is used to create a user
+  hosts: all
+  become: true
+  tasks:
+  - name: creating a user rohit
+    user:
+      name: suresh
+      state: present
+
+------------------------------------------------
+2.1 How to create multiple users by using loops concept:
+---
+- hosts: all
+  become: true
+  tasks:
+    - name: Create new users
+      user:
+        name: '{{ item }}'
+        state: present
+      loop:
+        - john
+        - mike
+        - andrew
+--------------------------------------------------------------------------------------------------------
+---------------------------------------------------------------------------------------------------------
+3.How to Install Webserver (httpd)and start httpd service:
+
+---
+  - name: Playbook
+    hosts: webservers
+    become: yes
+    become_user: root
+    tasks:
+      - name: install httpd
+        yum:
+          name: httpd
+          state: latest
+
+      - name: ensure httpd is running
+        service:
+          name: httpd
+          state: started
+Examples:
+
+- name: Start service httpd, if not running
+  service:
+    name: httpd
+    state: started
+
+- name: Stop service httpd, if running
+  service:
+    name: httpd
+    state: stopped
+
+- name: Restart service httpd, in all cases
+  service:
+    name: httpd
+    state: restarted
+
+- name: Reload service httpd, in all cases
+  service:
+    name: httpd
+    state: reloaded
+- name: Enable service httpd, and not touch the running state
+  service:
+    name: httpd
+    enabled: yes
+-----------------------------------------------------------------------------------------
+3.1 How to install webserver (httpd) and start service when nodes or hosts having different OS-Family and also copying file to all nodes
+---
+- name: my test playbook
+  hosts: all
+  become: true
+  tasks:
+  - name: install httpd package
+    yum:
+      name: httpd
+      state: installed
+    when: ansible_os_family == "RedHat"
+
+  - name: start apche
+    service:
+      name: httpd
+      state: started
+    when: ansible_os_family == "RedHat"
+
+  - name: install httpd package
+    yum:
+      name: httpd
+      state: installed
+    when: ansible_os_family == "Debian"
+
+  - name: start apche
+    service:
+      name: httpd
+      state: started
+    when: ansible_os_family == "Debian"
+
+  - name: copy index.html
+    copy:
+      src: /home/ansadmin/index.html
+      dest: /var/www/html
+      mode: 0666
+
+---------------------------------------------------------------------------
+---------------------------------------------------------------------------
+4.How to use vars concept:
+---
+- hosts: all
+  vars:
+    continents:
+      - Africa
+      - Asia
+      - South America
+      - North America
+      - Europe
+
+  tasks:
+  - name: Ansible List variable Example
+    debug:
+      msg: "{{ continents  }}"
+--------------------------------------------
+
+5.How to setup tomcat
+
+---
+- name: setup tomcat
+  hosts: all
+  become: true
+  tasks:
+  - name: install java on RedHat
+    yum:
+      name: java
+      state: installed
+    when: ansible_os_family == 'RedHat'
+
+  - name: install java on Ubuntu
+    apt:
+      name: default-jdk
+      state: present
+    when: ansible_os_family == 'Debian'
+
+  - name: Download tomcat
+    get_url:
+      url: https://dlcdn.apache.org/tomcat/tomcat-8/v8.5.83/bin/apache-tomcat-8.5.83.tar.gz
+      dest: /opt
+
+  - name: extracting the tar.gz file (Unarchive a file that is already on the remote machine)
+    unarchive:
+      src: /opt/apache-tomcat-8.5.83.tar.gz
+      dest: /opt
+      remote_src: yes
+
+  - name: Changing permission of the file (ownership)
+    file:
+      path: /opt/apache-tomcat-8.5.83/bin/startup.sh
+      mode: 0777
+
+  - name: starting tomcat service
+    shell: ./startup.sh
+    args:
+      chdir: /opt/apache-tomcat-8.5.83/bin/
+
+--------------------------------------------------------------------------------------------------
+

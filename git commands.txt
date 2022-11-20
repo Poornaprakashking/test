@@ -1,0 +1,10 @@
+git basic rule
+pull first , push next
+git pull --rebase origin branchname you want to push
+git push origin branchname (git branchn):branchname (github branch)
+--------------------------------------------------------------------------------
+git clone url
+specific branch 
+ git clone --branch branchname --single-branch <https://github.com/username/Repo.git>
+---------------------------------------------------------------------------------------
+
